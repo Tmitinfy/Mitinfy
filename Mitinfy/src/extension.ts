@@ -1,9 +1,16 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import express from 'express';
+import spotify from 'spotify-web-api-node';
+const spotipy = new spotify();
+const app = express();
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
+const CLIENT_ID = "6ed056117cfb4d9bb9a93ec4bcb7d5b9";
+const CLIENT_SECRET = "bcf93dd96259479dbe7f2e8a0097ae2b";
+const REDIRECT_URL = "https://localhost:8080/callback";
 export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -21,6 +28,24 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(disposable);
 }
-
+export async function login() {
+    const auth_url = 'https://accounts.spotify.com/authorize?' +
+        `client_id=${CLIENT_ID}` + 
+        'response_type=code&' +
+        `redirect_url=${REDIRECT_URL}&` +
+        'scope=user-read-playback-state';
+    vscode.env.openExternal(vscode.Uri.parse(auth_url)); 
+        const listenUsr = async (resolve, reject) => {
+            app.get('/callback', async (req, res) => {
+                try {
+                    
+                } catch (error) {
+                    
+                }
+            })
+        }
+}
 // This method is called when your extension is deactivated
 export function deactivate() {}
+
+export function playMusic() {}
