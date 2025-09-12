@@ -17,6 +17,7 @@
         "command": "Mitinfy.helloWorld",
         "title": "Hello World"
       }
+      
     ]
   },
   "scripts": {
@@ -34,6 +35,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/spotify-web-api-node": "^5.0.11",
@@ -44,10 +46,12 @@
     "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.25.8",
     "eslint": "^9.32.0",
+    "express": "^5.1.0",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "spotify-web-api-node": "^5.0.2"
+    "spotify-web-api-node": "^5.0.2",
+    "Typescript": "npm:typescript@^5.9.2"
   }
 }
