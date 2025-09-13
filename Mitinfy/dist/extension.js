@@ -45,7 +45,7 @@ exports.playMusic = playMusic;
 // Import the module and reference it with the alias vscode in your code below
 const vscode = __importStar(require("vscode"));
 const express_1 = __importDefault(require("express"));
-const login_1 = require("./login");
+const login_1 = require("./log_in/login");
 exports.app = (0, express_1.default)();
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -63,9 +63,13 @@ function activate(context) {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World from mitinfy!');
+        vscode.window.showInformationMessage('Please init session with spotify for play your music');
+    });
+    const loginDisposable = vscode.commands.registerCommand('Mitinfy.login', () => {
+        vscode.window.showInformationMessage('Connecting with spotify...');
         (0, login_1.login)();
     });
-    context.subscriptions.push(disposable);
+    context.subscriptions.push(disposable, loginDisposable);
 }
 function Login(context) {
     const disposable = vscode.commands.registerCommand('mitinfy.login', () => {

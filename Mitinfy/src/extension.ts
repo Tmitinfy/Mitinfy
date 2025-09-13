@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import express from 'express';
 import spotify from 'spotify-web-api-node';
-import { login } from './login';
+import { login } from './log_in/login';
 export const app = express();
 
 // This method is called when your extension is activated
@@ -24,9 +24,14 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from mitinfy!');
+		vscode.window.showInformationMessage('Please init session with spotify for play your music');
+	});
+	const loginDisposable = vscode.commands.registerCommand('Mitinfy.login', () => {
+		vscode.window.showInformationMessage('Connecting with spotify...');
 		login();
 	});
-	context.subscriptions.push(disposable);
+
+	context.subscriptions.push(disposable, loginDisposable);
 }
 export function Login(context: vscode.ExtensionContext) {
 	const disposable = vscode.commands.registerCommand('mitinfy.login', () => {

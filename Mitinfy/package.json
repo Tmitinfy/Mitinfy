@@ -20,10 +20,27 @@
         "title": "Hello World"
       },
       {
-        "command": "mitinfy.login",
+        "command": "Mitinfy.login",
         "title": "login into mitinfy"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Mitinfy",
+      "properties": {
+        "mitinfy.accessToken": {
+          "type": "string",
+          "default": "",
+          "description": "Spotify access token",
+          "scope": "machine"
+        },
+        "mitinfy.refreshToken": {
+          "type": "string",
+          "default": "",
+          "description": "Spotify refresh token",
+          "scope": "machine"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
