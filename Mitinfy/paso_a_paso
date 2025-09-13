@@ -1,0 +1,19 @@
+Chicos, si quieren probar la app/extension deben de seguir los siguientes pasos.
+1) verificar si el codigo está al día (cada vez que empiecen con una nueva funcionalidad, fetch para traer todos los cambios, pull para insertarlos).
+2) crear una nueva rama basada en la rama central (main).
+3) compilan el código con el siguiente comando: 'npm run compile'
+4) apretan ctrl + shift + p
+5) buscan "Developer: Debug Extension Host In New Window" (pueden abreviar).
+6) ejecutan el comando (se va a abrir otra ventana de vscode).
+7) dentro de la ventana que se abrió, vuelven a ejecutar el paso 4.
+8) buscan el comando que configuraron y lo ejecutan.
+{
+    (si funciona el código que hicieron)
+    1) entrar a github.
+    2) crear la pull request.
+    3) avisar que está la pull request.
+
+    (si no funciona)
+    sigan con el desarrollo haciedo commits en en las ramas correspondientes a sus funcionalidades (NO TOCAR LA RAMA MAIN)
+}
+
