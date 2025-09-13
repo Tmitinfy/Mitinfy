@@ -7,11 +7,11 @@ exports.login = login;
 const vscode_1 = __importDefault(require("vscode"));
 const extension_1 = require("./extension");
 async function login() {
-    const auth_url = 'https://accounts.spotify.com/authorize?' +
-        `client_id=${extension_1.CLIENT_ID}` +
-        'response_type=code&' +
-        `redirect_url=${extension_1.REDIRECT_URL}&` +
-        'scope=user-read-playback-state';
+    const auth_url = 'https://accounts.spotify.com/authorize?'
+        + `client_id=${extension_1.CLIENT_ID}`
+        + '&response_type=code'
+        + `&redirect_uri=${extension_1.REDIRECT_URL}`
+        + '&scope=user-read-playback-state';
     await vscode_1.default.env.openExternal(vscode_1.default.Uri.parse(auth_url));
     const getUsrToken = () => {
         return extension_1.app.get('/callback', async (req, res) => {

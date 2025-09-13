@@ -20,12 +20,8 @@
         "title": "Hello World"
       },
       {
-        "command": "Mitinfy.login",
-        "title": "init sssion into mitinfy."
-      },
-      {
-        "command": "Mitinfy.run",
-        "title": "Run music into mitinfy"
+        "command": "mitinfy.login",
+        "title": "login into mitinfy"
       }
     ]
   },
@@ -53,5 +49,7 @@
   "dependencies": {
     "spotify-web-api-node": "^5.0.2",
     "Typescript": "npm:typescript@^5.9.2"
-  }
+  },
+  "author": "",
+  "license": "ISC"
 }

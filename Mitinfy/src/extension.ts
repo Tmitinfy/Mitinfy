@@ -10,7 +10,7 @@ export const app = express();
 // Your extension is activated the very first time the command is executed
 export const CLIENT_ID = "6ed056117cfb4d9bb9a93ec4bcb7d5b9";
 export const CLIENT_SECRET = "bcf93dd96259479dbe7f2e8a0097ae2b";
-export const REDIRECT_URL = "https://localhost:8080/callback";
+export const REDIRECT_URL ='http://127.0.0.1:8080/callback';
 export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -24,12 +24,18 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from mitinfy!');
+		login();
 	});
-    const initSession = vscode.commands.registerCommand('Mitinfy.login', () => {
-        login();
-    });
+	context.subscriptions.push(disposable);
+}
+export function Login(context: vscode.ExtensionContext) {
+	const disposable = vscode.commands.registerCommand('mitinfy.login', () => {
+		vscode.window.showInformationMessage('Please make the login with Spotify first');
+		login();
+	
+	} );
+	context.subscriptions.push(disposable);
 
-	context.subscriptions.push(disposable, initSession);
 }
 
 // This method is called when your extension is deactivated

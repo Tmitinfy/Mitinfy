@@ -38,6 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.REDIRECT_URL = exports.CLIENT_SECRET = exports.CLIENT_ID = exports.app = void 0;
 exports.activate = activate;
+exports.Login = Login;
 exports.deactivate = deactivate;
 exports.playMusic = playMusic;
 // The module 'vscode' contains the VS Code extensibility API
@@ -50,7 +51,7 @@ exports.app = (0, express_1.default)();
 // Your extension is activated the very first time the command is executed
 exports.CLIENT_ID = "6ed056117cfb4d9bb9a93ec4bcb7d5b9";
 exports.CLIENT_SECRET = "bcf93dd96259479dbe7f2e8a0097ae2b";
-exports.REDIRECT_URL = "https://localhost:8080/callback";
+exports.REDIRECT_URL = 'http://127.0.0.1:8080/callback';
 function activate(context) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
@@ -62,11 +63,16 @@ function activate(context) {
         // The code you place here will be executed every time your command is executed
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World from mitinfy!');
-    });
-    const initSession = vscode.commands.registerCommand('Mitinfy.login', () => {
         (0, login_1.login)();
     });
-    context.subscriptions.push(disposable, initSession);
+    context.subscriptions.push(disposable);
+}
+function Login(context) {
+    const disposable = vscode.commands.registerCommand('mitinfy.login', () => {
+        vscode.window.showInformationMessage('Please make the login with Spotify first');
+        (0, login_1.login)();
+    });
+    context.subscriptions.push(disposable);
 }
 // This method is called when your extension is deactivated
 function deactivate() { }

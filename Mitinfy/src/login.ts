@@ -1,12 +1,12 @@
 import vscode from 'vscode';
 import { app, CLIENT_ID, REDIRECT_URL } from './extension';
 export async function login() {
-    const auth_url = 'https://accounts.spotify.com/authorize?' +
-    `client_id=${CLIENT_ID}` + 
-    'response_type=code&' +
-    `redirect_url=${REDIRECT_URL}&` +
-    'scope=user-read-playback-state'
-    ;
+    const auth_url = 'https://accounts.spotify.com/authorize?'
+        + `client_id=${CLIENT_ID}`
+        + '&response_type=code'
+        + `&redirect_uri=${REDIRECT_URL}`
+        + '&scope=user-read-playback-state';
+
     await vscode.env.openExternal(vscode.Uri.parse(auth_url));
 
     const getUsrToken = () => {
