@@ -1,7 +1,16 @@
 import vscode from 'vscode';
 import { app, CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } from '../extension';
-import { SpotifyAuthError, SpotifyErrorResponse, SpotifyTokenResponse} from './plantillas';
+import { SpotifyAuthError, SpotifyTokenResponse, verifyTokensSaved, generateErrorPage, generateSuccessPage } from './auxiliar_elems';
 let server: any = null;
+
+
+async function saveTokensToVSCode(accessToken: string, refreshToken: string): Promise<void> {
+    const config = vscode.workspace.getConfiguration();    
+    await Promise.all([
+        config.update('mitinfy.accessToken', accessToken, vscode.ConfigurationTarget.Global),
+        config.update('mitinfy.refreshToken', refreshToken, vscode.ConfigurationTarget.Global),
+    ]);
+};
 
 export async function login() {
     if (!server) {
@@ -74,65 +83,4 @@ export async function login() {
             vscode.window.showErrorMessage(`Error de autenticación: ${errorMessage}`);
         }
     });
-}
-
-// Funciones auxiliares para mejor organización
-
-async function saveTokensToVSCode(accessToken: string, refreshToken: string): Promise<void> {
-    const config = vscode.workspace.getConfiguration();    
-    await Promise.all([
-        config.update('mitinfy.accessToken', accessToken, vscode.ConfigurationTarget.Global),
-        config.update('mitinfy.refreshToken', refreshToken, vscode.ConfigurationTarget.Global),
-    ]);
-}
-
-async function verifyTokensSaved(): Promise<void> {
-    const config = vscode.workspace.getConfiguration();
-    const savedAccessToken = config.get('mitinfy.accessToken');
-    const savedRefreshToken = config.get('mitinfy.refreshToken');
-    
-    if (!savedAccessToken || !savedRefreshToken) {
-        throw new SpotifyAuthError('Error guardando tokens en VS Code', 500);
-    }
-}
-
-function generateSuccessPage(tokenData: SpotifyTokenResponse): string {
-    return `
-        <html>
-            <head>
-                <title>Mitinfy - Autenticación Exitosa</title>
-            </head>
-            <body>
-                <div class="success">✅ ¡Autenticación exitosa!</div>
-                <div class="info">Tu extensión Mitinfy está lista para usar Spotify.</div>
-                <div class="info">Ya puedes cerrar esta ventana y volver a VS Code.</div>
-                <div class="debug">
-                    <strong>Información de debug:</strong><br>
-                    • Access token: ${tokenData.access_token.substring(0, 20)}...<br>
-                    • Refresh token: ${tokenData.refresh_token.substring(0, 20)}...<br>
-                    • Expira en: ${tokenData.expires_in} segundos<br>
-                    • Scopes: ${tokenData.scope}
-                </div>
-                <button class="close-btn" onclick="window.close()">Cerrar ventana</button>
-            </body>
-        </html>
-    `;
-}
-
-function generateErrorPage(statusCode: number, errorMessage: string, details?: string): string {
-    return `
-        <html>
-            <head>
-                <title>Mitinfy - Error de Autenticación</title>
-            </head>
-            <body>
-                <div class="error">❌ Error de autenticación</div>
-                <div class="details">
-                    <strong>Error ${statusCode}:</strong> ${errorMessage}<br><br>
-                    <strong>Detalles:</strong> ${details}
-                </div>
-                <a href="javascript:history.back()" class="retry-btn">Reintentar</a>
-            </body>
-        </html>
-    `;
-}
+};
