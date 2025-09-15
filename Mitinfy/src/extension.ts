@@ -12,7 +12,6 @@ export const CLIENT_ID = "6ed056117cfb4d9bb9a93ec4bcb7d5b9";
 export const CLIENT_SECRET = "bcf93dd96259479dbe7f2e8a0097ae2b";
 export const REDIRECT_URL ='http://127.0.0.1:8080/callback';
 export function activate(context: vscode.ExtensionContext) {
-
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "Mitinfy" is now active!');
