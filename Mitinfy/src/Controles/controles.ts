@@ -7,7 +7,7 @@ export function getSavedAccessToken() {
     };
 }
 
-async function spotifyRequest(endpoint: string, method: string) {
+export async function spotifyRequest(endpoint: string, method: string) {
     const { original_token } = getSavedAccessToken();
 
     if (!original_token) {
@@ -32,20 +32,27 @@ async function spotifyRequest(endpoint: string, method: string) {
 // funciones
 export async function play() {
     await spotifyRequest("play", "PUT");
+    vscode.window.showInformationMessage("poner play");
 }
 
 
 export async function pause() {
     await spotifyRequest("pause", "PUT");
+    vscode.window.showInformationMessage("pausa");
 }
 
 
 export async function nextTrack() {
     await spotifyRequest("next", "POST");
+    vscode.window.showInformationMessage("cancioncita sisguiente");
 }
 
 
 export async function previousTrack() {
     await spotifyRequest("previous", "POST");
+    vscode.window.showInformationMessage("me quiero matar");
 }
+
+
+
 

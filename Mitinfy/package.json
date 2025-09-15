@@ -22,7 +22,26 @@
       {
         "command": "Mitinfy.login",
         "title": "login into mitinfy"
+      },
+
+      {
+        "command": "Mitinfy.play",
+        "title": "play cancion"
+      },
+      {
+        "command": "Mitinfy.pausa",
+        "title": "pausar cancion"
+      },
+      {
+        "command": "Mitinfy.siguienteCancion",
+        "title": "pasar cancion"
+      },
+      {
+        "command": "Mitinfy.cancionAnterior",
+        "title": "volver cancion"
       }
+
+
     ],
     "configuration": {
       "title": "Mitinfy",
@@ -64,9 +83,9 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "express": "^5.1.0",
     "spotify-web-api-node": "^5.0.2",
-    "Typescript": "npm:typescript@^5.9.2",
-    "express": "^5.1.0"
+    "Typescript": "npm:typescript@^5.9.2"
   },
   "author": "",
   "license": "ISC"
