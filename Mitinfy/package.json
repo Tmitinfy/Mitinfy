@@ -65,7 +65,8 @@
   },
   "dependencies": {
     "spotify-web-api-node": "^5.0.2",
-    "Typescript": "npm:typescript@^5.9.2"
+    "Typescript": "npm:typescript@^5.9.2",
+    "express": "^5.1.0"
   },
   "author": "",
   "license": "ISC"
