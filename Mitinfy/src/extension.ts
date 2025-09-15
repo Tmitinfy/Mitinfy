@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import express from 'express';
-import spotify from 'spotify-web-api-node';
+//import spotify from 'spotify-web-api-node';
 import { login } from './log_in/login';
 export const app = express();
 
