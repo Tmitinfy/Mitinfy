@@ -41,11 +41,13 @@ exports.activate = activate;
 exports.Login = Login;
 exports.deactivate = deactivate;
 exports.playMusic = playMusic;
-// The module 'vscode' contains the VS Code extensibility API
+// The module 'vscode' contains the VS Code extensibility API Rama controlesReproduccion
 // Import the module and reference it with the alias vscode in your code below
 const vscode = __importStar(require("vscode"));
 const express_1 = __importDefault(require("express"));
+//import spotify from 'spotify-web-api-node';
 const login_1 = require("./log_in/login");
+const controles_1 = require("./Controles/controles");
 exports.app = (0, express_1.default)();
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -69,7 +71,24 @@ function activate(context) {
         vscode.window.showInformationMessage('Connecting with spotify...');
         (0, login_1.login)();
     });
-    context.subscriptions.push(disposable, loginDisposable);
+    // comandos de funciones del control de reproduccion 
+    const playDisposable = vscode.commands.registerCommand('Mitinfy.play', () => {
+        vscode.window.showInformationMessage('inicia a escuchar musica');
+        (0, controles_1.play)();
+    });
+    const pauseDisposable = vscode.commands.registerCommand('Mitinfy.pausa', () => {
+        vscode.window.showInformationMessage('se pauso la reproduccion');
+        (0, controles_1.pause)();
+    });
+    const skipDisposable = vscode.commands.registerCommand('Mitinfy.siguienteCancion', () => {
+        vscode.window.showInformationMessage('se paso a la siguente cancion');
+        (0, controles_1.nextTrack)();
+    });
+    const pepitoDisposable = vscode.commands.registerCommand('Mitinfy.cancionAnterior', () => {
+        vscode.window.showInformationMessage('cancion anterior');
+        (0, controles_1.previousTrack)();
+    });
+    context.subscriptions.push(disposable, loginDisposable, playDisposable, pauseDisposable, skipDisposable, pepitoDisposable);
 }
 function Login(context) {
     const disposable = vscode.commands.registerCommand('mitinfy.login', () => {
