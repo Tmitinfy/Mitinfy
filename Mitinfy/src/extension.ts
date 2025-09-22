@@ -1,16 +1,15 @@
 // The module 'vscode' contains the VS Code extensibility API
 import * as vscode from 'vscode';
 import express from 'express';
-//import spotify from 'spotify-web-api-node';
 import { login } from './log_in/login';
 import { nextTrack, previousTrack, play, pause } from './Controles/controles';
-import { searchAndPlayTrack } from "./reproducir"; // <-- IMPORTA tu archivo reproducir.ts
+import { searchAndPlayTrack, saveTrackToLibrary } from "./reproducir"; // IMPORTA ambas funciones
 
 export const app = express();
 
 export const CLIENT_ID = "6ed056117cfb4d9bb9a93ec4bcb7d5b9";
 export const CLIENT_SECRET = "bcf93dd96259479dbe7f2e8a0097ae2b";
-export const REDIRECT_URL ='http://127.0.0.1:8080/callback';
+export const REDIRECT_URL = 'http://127.0.0.1:8080/callback';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -58,6 +57,15 @@ export function activate(context: vscode.ExtensionContext) {
         if (query) await searchAndPlayTrack(query);
     });
 
+    // Comando para guardar en favoritos
+    const favoriteTrackCommand = vscode.commands.registerCommand("Mitinfy.favTrack", async () => {
+        const query = await vscode.window.showInputBox({
+            prompt: "Escribí el nombre de la canción que querés guardar en favoritos",
+        });
+
+        if (query) await saveTrackToLibrary(query);
+    });
+
     // Registramos todos los comandos
     context.subscriptions.push(
         disposable,
@@ -66,7 +74,8 @@ export function activate(context: vscode.ExtensionContext) {
         pauseDisposable,
         skipDisposable,
         pepitoDisposable,
-        playTrackCommand // <-- agregado tu comando
+        playTrackCommand,
+        favoriteTrackCommand
     );
 }
 
@@ -80,5 +89,4 @@ export function Login(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
 export function playMusic() {}
