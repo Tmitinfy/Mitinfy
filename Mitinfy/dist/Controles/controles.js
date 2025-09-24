@@ -3,11 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.spotifyRequest = spotifyRequest;
-exports.play = play;
-exports.pause = pause;
-exports.nextTrack = nextTrack;
-exports.previousTrack = previousTrack;
+exports.previousTrack = exports.nextTrack = exports.pause = exports.play = exports.spotifyRequest = void 0;
 const vscode_1 = __importDefault(require("vscode"));
 const extension_1 = require("../extension");
 async function spotifyRequest(endpoint, method) {
@@ -28,21 +24,26 @@ async function spotifyRequest(endpoint, method) {
         vscode_1.default.window.showErrorMessage(`Error de Spotify: ${error}`);
     }
 }
+exports.spotifyRequest = spotifyRequest;
 // funciones
 async function play() {
     await spotifyRequest("play", "PUT");
     vscode_1.default.window.showInformationMessage("poner play");
 }
+exports.play = play;
 async function pause() {
     await spotifyRequest("pause", "PUT");
     vscode_1.default.window.showInformationMessage("pausa");
 }
+exports.pause = pause;
 async function nextTrack() {
     await spotifyRequest("next", "POST");
     vscode_1.default.window.showInformationMessage("cancioncita sisguiente");
 }
+exports.nextTrack = nextTrack;
 async function previousTrack() {
     await spotifyRequest("previous", "POST");
     vscode_1.default.window.showInformationMessage("me quiero matar");
 }
+exports.previousTrack = previousTrack;
 //# sourceMappingURL=controles.js.map

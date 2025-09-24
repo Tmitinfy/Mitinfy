@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = login;
+exports.login = void 0;
 const vscode_1 = __importDefault(require("vscode"));
 const extension_1 = require("../extension");
 const auxiliar_elems_1 = require("./auxiliar_elems");
@@ -23,10 +23,10 @@ async function login() {
         });
     }
     const scopes = [
-        'streaming', // CRÍTICO - Web Playback SDK
-        'user-read-email', // CRÍTICO - Web Playback SDK  
-        'user-read-private', // CRÍTICO - Web Playback SDK
-        'user-read-playback-state', // Para leer estado actual
+        'streaming',
+        'user-read-email',
+        'user-read-private',
+        'user-read-playback-state',
         'user-modify-playback-state' // Para controlar reproducción
     ].join('%20');
     const auth_url = 'https://accounts.spotify.com/authorize?'
@@ -81,5 +81,6 @@ async function login() {
         }
     });
 }
+exports.login = login;
 ;
 //# sourceMappingURL=login.js.map

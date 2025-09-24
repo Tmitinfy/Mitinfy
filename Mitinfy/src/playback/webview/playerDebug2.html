@@ -34,59 +34,74 @@
                 logDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
             }
         }
-                
+        
+        addLog('🎬 DEBUG HTML loaded');
+        
         try {
             const vscode = acquireVsCodeApi();
+            addLog('✅ VSCode API acquired');
             
             // Send test message
             vscode.postMessage({ 
                 type: 'test', 
                 message: 'DEBUG Webview JavaScript is running' 
             });
+            addLog('✅ Test message sent');
             
             // Single message listener
             window.addEventListener('message', (event) => {
-                let message = event.data;
+                addLog('📨 RAW MESSAGE: ' + JSON.stringify(event.data));
+                
+                const message = event.data;
                 if (!message || !message.type) {
                     addLog('❌ Invalid message format');
                     return;
                 }
-                // Desempaquetar body si es SP_MESSAGE
-                if (message.type === 'SP_MESSAGE' && message.body) {
-                    message = { type: 'SP_MESSAGE', ...message.body };
-                }
+                
+                addLog('📝 Processing message type: ' + message.type);
+                
                 switch (message.type) {
                     case 'token':
+                        addLog('🔑 TOKEN RECEIVED! Length: ' + (message.token ? message.token.length : 0));
+                        
                         if (!message.token) {
+                            addLog('❌ No token in message');
                             vscode.postMessage({ type: 'error', message: 'No token received' });
                             return;
                         }
+                        
                         // Test token validity
+                        addLog('🧪 Testing token validity...');
                         fetch('https://api.spotify.com/v1/me', {
                             headers: { 'Authorization': `Bearer ${message.token}` }
                         })
                         .then(response => {
+                            addLog('🌐 Token test response: ' + response.status);
                             if (!response.ok) {
                                 throw new Error('HTTP ' + response.status);
                             }
                             return response.json();
                         })
                         .then(data => {
+                            addLog('👤 User: ' + data.display_name + ' (' + data.product + ')');
+                            
                             if (data.product === 'premium') {
                                 addLog('✅ Premium confirmed - can initialize player');
                                 vscode.postMessage({ 
                                     type: 'info', 
                                     message: `Premium user: ${data.display_name}` 
                                 });
+                                
                                 // Try to initialize Spotify Player
-                                try{
-                                    initializeSpotifyPlayer(token)
-                                }catch{
-                                    if (typeof Spotify === 'undefined') {
-                                        addLog('❌ Spotify SDK not loaded');
-                                        vscode.postMessage({ type: 'error', message: 'Spotify SDK not available' });
-                                    }
-                                } 
+                                addLog('🎵 Checking Spotify SDK...');
+                                if (typeof Spotify === 'undefined') {
+                                    addLog('❌ Spotify SDK not loaded');
+                                    vscode.postMessage({ type: 'error', message: 'Spotify SDK not available' });
+                                } else {
+                                    addLog('✅ Spotify SDK available');
+                                    initializeSpotifyPlayer(message.token);
+                                }
+                                
                             } else {
                                 addLog('❌ Premium required, current: ' + data.product);
                                 vscode.postMessage({ 
@@ -103,34 +118,11 @@
                             });
                         });
                         break;
+                        
                     case 'play':
                         addLog('▶️ Play command received');
                         break;
-                    case 'SP_MESSAGE':
-                        addLog('🟢 SP_MESSAGE recibido: ' + JSON.stringify(message));
-                        if (message.topic) {
-                            switch (message.topic) {
-                                case 'EVENT':
-                                    if (message.data && message.data.name === 'PLAYER_INIT_ERROR') {
-                                        addLog('❌ PLAYER_INIT_ERROR: ' + (message.data.eventData?.message || 'Unknown'));
-                                        vscode.postMessage({ type: 'error', message: 'Init error: ' + (message.data.eventData?.message || 'Unknown') });
-                                    }
-                                    break;
-                                case 'GET_TOKEN':
-                                    addLog('🔑 GET_TOKEN solicitado, reenviando petición a extensión...');
-                                    vscode.postMessage({ type: 'SP_MESSAGE', topic: 'GET_TOKEN' });
-                                    break;
-                                case 'CONNECTED':
-                                    addLog('🔗 CONNECTED: ' + JSON.stringify(message.data));
-                                    break;
-                                default:
-                                    addLog('❓ SP_MESSAGE topic desconocido: ' + message.topic);
-                                    break;
-                            }
-                        } else {
-                            addLog('❓ SP_MESSAGE recibido sin topic');
-                        }
-                        break;
+                        
                     default:
                         addLog('❓ Unknown message type: ' + message.type);
                 }

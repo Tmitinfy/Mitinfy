@@ -15,23 +15,13 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SpotifyPlayerService = void 0;
 const vscode = __importStar(require("vscode"));
@@ -91,8 +81,6 @@ class SpotifyPlayerService {
             console.log('PlayerService received message:', message);
             vscode.window.showInformationMessage(`Mensaje recibido: ${JSON.stringify(message)}`);
             switch (message.type) {
-                // En tu switch del onDidReceiveMessage, agrega:
-                // En el switch del onDidReceiveMessage:
                 case 'info':
                     console.log('Player info:', message.message);
                     vscode.window.showInformationMessage(`Player: ${message.message}`);
@@ -126,31 +114,40 @@ class SpotifyPlayerService {
                     // Handle state changes (can update UI, status bar, etc)
                     console.log('Playback state changed:', message.state);
                     break;
+                case 'SP_MESSAGE':
+                    // Manejo de mensajes tipo SP_MESSAGE desde el WebView
+                    if (message.topic) {
+                        switch (message.topic) {
+                            case 'EVENT':
+                                if (message.data && message.data.name === 'PLAYER_INIT_ERROR') {
+                                    vscode.window.showErrorMessage('Init error: ' + (message.data.eventData?.message || 'Unknown'));
+                                }
+                                break;
+                            case 'GET_TOKEN':
+                                // Enviar el token al WebView si es solicitado
+                                const { original_token } = (0, extension_1.getSavedAccessToken)();
+                                if (original_token && this.panel) {
+                                    this.panel.webview.postMessage({ type: 'token', token: original_token });
+                                }
+                                else {
+                                    vscode.window.showErrorMessage('No access token available for GET_TOKEN');
+                                }
+                                break;
+                            case 'CONNECTED':
+                                vscode.window.showInformationMessage('Connect result: ' + (message.data?.connected ? 'true' : 'false'));
+                                break;
+                            default:
+                                vscode.window.showWarningMessage('SP_MESSAGE topic desconocido: ' + message.topic);
+                                break;
+                        }
+                    }
+                    else {
+                        vscode.window.showWarningMessage('SP_MESSAGE recibido sin topic');
+                    }
+                    break;
             }
         }, undefined, this.context.subscriptions);
         vscode.window.showInformationMessage('5)Handlers set up');
-        // Send token to WebView after a short delay to ensure it's ready
-        // -----------------------------------------------------------------------
-        // Desde acá al final hay algo que provoca que no termine de cargar el webview, al testeo se llega a cargar el handler.
-        /*
-        setTimeout(async () => {
-            vscode.window.showInformationMessage('Timeout iniciado...');
-            const { original_token } = getSavedAccessToken();
-            vscode.window.showInformationMessage(`Token obtenido en timeout --> ${original_token}`);
-            if (original_token && this.panel) {
-                vscode.window.showInformationMessage('Token y panel disponibles, enviando token...');
-                console.log('Sending token to WebView');
-                await this.panel.webview.postMessage({
-                    type: 'token',
-                    token: original_token
-                });
-                vscode.window.showInformationMessage('Token enviado al webview');
-            }else{
-                vscode.window.showInformationMessage('Token o panel no disponibles, no se envía token');
-            }
-            vscode.window.showInformationMessage('Timeout finalizado...');
-        }, 1000);
-        */
         setTimeout(async () => {
             console.log('🔥 TIMEOUT: Starting token send process');
             vscode.window.showInformationMessage('Timeout iniciado...');
@@ -190,7 +187,7 @@ class SpotifyPlayerService {
             return;
         }
         const possiblePaths = [
-            path.join(this.context.extensionPath, 'src', 'playback', 'webview', 'player.html'),
+            path.join(this.context.extensionPath, 'src', 'playback', 'webview', 'playerDebug2.html'),
             path.join(this.context.extensionPath, 'playerTest.html'),
             path.join(this.context.extensionPath, 'webview', 'playerTest.html')
         ];
@@ -279,25 +276,6 @@ class SpotifyPlayerService {
             vscode.window.showErrorMessage('Failed to play track');
         }
     }
-    /*
-    private getWebviewContent(htmlContent: string): string {
-        // Ensure the HTML has proper webview setup
-        return htmlContent.replace(
-            /<script>/g,
-            `<script>
-                // Verificar que acquireVsCodeApi esté disponible
-                if (typeof acquireVsCodeApi === 'undefined') {
-                    console.error('acquireVsCodeApi is not available - this should only run in VS Code webview');
-                    window.vscode = { postMessage: () => console.log('Mock postMessage called') };
-                } else {
-                    window.vscode = acquireVsCodeApi();
-                }
-            </script>
-            `
-        );
-    }
-
-    */
     getFallbackHTML() {
         return `
         <!DOCTYPE html>

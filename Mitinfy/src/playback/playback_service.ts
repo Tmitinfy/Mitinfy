@@ -33,16 +33,12 @@ export class SpotifyPlayerService {
             this.panel.reveal();
             return;
         }
-        vscode.window.showInformationMessage('1)panel cargado');
         // Verify we have a token before proceeding
         const { original_token } = getSavedAccessToken();
         if (!original_token) {
             vscode.window.showErrorMessage('No access token found. Please log in first using "Mitinfy: Login into Mitinfy"');
             throw new Error('No access token found. Please log in first.');
         }
-        vscode.window.showInformationMessage('2)token cargado');
-
-
         // Create WebView panel with proper configuration
         this.panel = vscode.window.createWebviewPanel(
             'spotifyPlayer',
@@ -58,24 +54,16 @@ export class SpotifyPlayerService {
                 ]
             }
         );
-        vscode.window.showInformationMessage('3)panel creado');
-
-
         // Load the WebView content with better error handling
         await this.loadWebviewContent();
-        vscode.window.showInformationMessage('4)WebView funcionando');
-
 
         // Handle messages from WebView
         this.panel.webview.onDidReceiveMessage(
             async (message) => {
-
                 console.log('PlayerService received message:', message);
                 vscode.window.showInformationMessage(`Mensaje recibido: ${JSON.stringify(message)}`);
                 
                 switch (message.type) {
-                    // En tu switch del onDidReceiveMessage, agrega:
-                    // En el switch del onDidReceiveMessage:
                     case 'info':
                         console.log('Player info:', message.message);
                         vscode.window.showInformationMessage(`Player: ${message.message}`);
@@ -88,13 +76,10 @@ export class SpotifyPlayerService {
                         try {
                             vscode.window.showInformationMessage(`Ready message: ${JSON.stringify(message)}`);
                             console.log("Full ready message:", message);
-                            
                             this.deviceId = message.deviceId;
-                            
                             if (!this.deviceId) {
                                 throw new Error('Device ID is undefined or empty');
                             }
-                            
                             console.log('Device ID set to:', this.deviceId);
                             vscode.window.showInformationMessage(`Player ready! Device: ${this.deviceId}`);
                         } catch (error) {
@@ -103,7 +88,6 @@ export class SpotifyPlayerService {
                             vscode.window.showErrorMessage(`Ready error: ${errorMessage}`);
                         }
                         break;
-
                     case 'error':
                         console.error('Player error:', message.message);
                         vscode.window.showErrorMessage(`Player error: ${message.message}`);
@@ -112,6 +96,35 @@ export class SpotifyPlayerService {
                         // Handle state changes (can update UI, status bar, etc)
                         console.log('Playback state changed:', message.state);
                         break;
+                    case 'SP_MESSAGE':
+                        // Manejo de mensajes tipo SP_MESSAGE desde el WebView
+                        if (message.topic) {
+                            switch (message.topic) {
+                                case 'EVENT':
+                                    if (message.data && message.data.name === 'PLAYER_INIT_ERROR') {
+                                        vscode.window.showErrorMessage('Init error: ' + (message.data.eventData?.message || 'Unknown'));
+                                    }
+                                    break;
+                                case 'GET_TOKEN':
+                                    // Enviar el token al WebView si es solicitado
+                                    const { original_token } = getSavedAccessToken();
+                                    if (original_token && this.panel) {
+                                        this.panel.webview.postMessage({ type: 'token', token: original_token });
+                                    } else {
+                                        vscode.window.showErrorMessage('No access token available for GET_TOKEN');
+                                    }
+                                    break;
+                                case 'CONNECTED':
+                                    vscode.window.showInformationMessage('Connect result: ' + (message.data?.connected ? 'true' : 'false'));
+                                    break;
+                                default:
+                                    vscode.window.showWarningMessage('SP_MESSAGE topic desconocido: ' + message.topic);
+                                    break;
+                            }
+                        } else {
+                            vscode.window.showWarningMessage('SP_MESSAGE recibido sin topic');
+                        }
+                        break;
                 }
             },
             undefined,
@@ -119,28 +132,6 @@ export class SpotifyPlayerService {
         );
         vscode.window.showInformationMessage('5)Handlers set up');
 
-        // Send token to WebView after a short delay to ensure it's ready
-        // -----------------------------------------------------------------------
-        // Desde acá al final hay algo que provoca que no termine de cargar el webview, al testeo se llega a cargar el handler.
-        /*
-        setTimeout(async () => {
-            vscode.window.showInformationMessage('Timeout iniciado...');
-            const { original_token } = getSavedAccessToken();
-            vscode.window.showInformationMessage(`Token obtenido en timeout --> ${original_token}`);
-            if (original_token && this.panel) {
-                vscode.window.showInformationMessage('Token y panel disponibles, enviando token...');
-                console.log('Sending token to WebView');
-                await this.panel.webview.postMessage({ 
-                    type: 'token', 
-                    token: original_token 
-                });
-                vscode.window.showInformationMessage('Token enviado al webview');
-            }else{
-                vscode.window.showInformationMessage('Token o panel no disponibles, no se envía token');
-            }
-            vscode.window.showInformationMessage('Timeout finalizado...');
-        }, 1000);
-        */
         setTimeout(async () => {
             console.log('🔥 TIMEOUT: Starting token send process');
             vscode.window.showInformationMessage('Timeout iniciado...');
@@ -179,14 +170,12 @@ export class SpotifyPlayerService {
             this.deviceId = undefined;
         });
         vscode.window.showInformationMessage('6) limpieza hecha.');
-        
     }
-
 
     private async loadWebviewContent() {
         if (!this.panel) { return; }
         const possiblePaths = [
-            path.join(this.context.extensionPath, 'src', 'playback', 'webview', 'player.html'),
+            path.join(this.context.extensionPath, 'src', 'playback', 'webview', 'playerDebug2.html'),
             path.join(this.context.extensionPath, 'playerTest.html'),
             path.join(this.context.extensionPath, 'webview', 'playerTest.html')
         ];
@@ -202,12 +191,9 @@ export class SpotifyPlayerService {
         });
 
         const results = await Promise.allSettled(promises);
-        const successful = results.find(result => 
-            result.status === 'fulfilled' && result.value !== null
-        );
+        const successful = results.find(result => result.status === 'fulfilled' && result.value !== null );
 
-        let htmlContent = '';
-        
+        let htmlContent = '';        
         if (successful && successful.status === 'fulfilled') {
             htmlContent = successful.value?.content || '';
             console.log('Successfully loaded HTML from:', successful.value?.path);
@@ -288,26 +274,6 @@ export class SpotifyPlayerService {
             vscode.window.showErrorMessage('Failed to play track');
         }
     }
-
-    /*
-    private getWebviewContent(htmlContent: string): string {
-        // Ensure the HTML has proper webview setup
-        return htmlContent.replace(
-            /<script>/g, 
-            `<script>
-                // Verificar que acquireVsCodeApi esté disponible
-                if (typeof acquireVsCodeApi === 'undefined') {
-                    console.error('acquireVsCodeApi is not available - this should only run in VS Code webview');
-                    window.vscode = { postMessage: () => console.log('Mock postMessage called') };
-                } else {
-                    window.vscode = acquireVsCodeApi();
-                }
-            </script>
-            `
-        );
-    }
-
-    */
 
     private getFallbackHTML(): string {
         return `
