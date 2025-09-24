@@ -38,66 +38,66 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.REDIRECT_URL = exports.CLIENT_SECRET = exports.CLIENT_ID = exports.app = void 0;
 exports.activate = activate;
-exports.Login = Login;
+exports.getSavedAccessToken = getSavedAccessToken;
 exports.deactivate = deactivate;
 exports.playMusic = playMusic;
-// The module 'vscode' contains the VS Code extensibility API Rama controlesReproduccion
-// Import the module and reference it with the alias vscode in your code below
 const vscode = __importStar(require("vscode"));
 const express_1 = __importDefault(require("express"));
-//import spotify from 'spotify-web-api-node';
+const playback_service_1 = require("./playback/playback_service");
 const login_1 = require("./log_in/login");
-const controles_1 = require("./Controles/controles");
 exports.app = (0, express_1.default)();
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+// Your existing constants
 exports.CLIENT_ID = "6ed056117cfb4d9bb9a93ec4bcb7d5b9";
 exports.CLIENT_SECRET = "bcf93dd96259479dbe7f2e8a0097ae2b";
-exports.REDIRECT_URL = 'http://127.0.0.1:8080/callback';
+exports.REDIRECT_URL = "http://127.0.0.1:8080/callback";
+let playerService;
 function activate(context) {
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "Mitinfy" is now active!');
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
-    const disposable = vscode.commands.registerCommand('Mitinfy.helloWorld', () => {
-        // The code you place here will be executed every time your command is executed
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World from mitinfy!');
-        vscode.window.showInformationMessage('Please init session with spotify for play your music');
-    });
-    const loginDisposable = vscode.commands.registerCommand('Mitinfy.login', () => {
-        vscode.window.showInformationMessage('Connecting with spotify...');
-        (0, login_1.login)();
-    });
-    // comandos de funciones del control de reproduccion 
-    const playDisposable = vscode.commands.registerCommand('Mitinfy.play', () => {
-        vscode.window.showInformationMessage('inicia a escuchar musica');
-        (0, controles_1.play)();
-    });
-    const pauseDisposable = vscode.commands.registerCommand('Mitinfy.pausa', () => {
-        vscode.window.showInformationMessage('se pauso la reproduccion');
-        (0, controles_1.pause)();
-    });
-    const skipDisposable = vscode.commands.registerCommand('Mitinfy.siguienteCancion', () => {
-        vscode.window.showInformationMessage('se paso a la siguente cancion');
-        (0, controles_1.nextTrack)();
-    });
-    const pepitoDisposable = vscode.commands.registerCommand('Mitinfy.cancionAnterior', () => {
-        vscode.window.showInformationMessage('cancion anterior');
-        (0, controles_1.previousTrack)();
-    });
-    context.subscriptions.push(disposable, loginDisposable, playDisposable, pauseDisposable, skipDisposable, pepitoDisposable);
+    // Initialize the player service
+    playerService = playback_service_1.SpotifyPlayerService.getInstance(context);
+    // Register all commands
+    const disposables = [
+        vscode.commands.registerCommand('Mitinfy.helloWorld', () => {
+            vscode.window.showInformationMessage('Hello World from mitinfy!');
+        }),
+        vscode.commands.registerCommand('Mitinfy.login', () => { (0, login_1.login)(); }),
+        vscode.commands.registerCommand('Mitinfy.showPlayer', async () => {
+            try {
+                await playerService.initializePlayer();
+            }
+            catch (error) {
+                vscode.window.showErrorMessage(`Failed to show player: ${error}`);
+            }
+        }),
+        vscode.commands.registerCommand('Mitinfy.search', () => {
+            playerService.showSearch();
+        }),
+        vscode.commands.registerCommand('Mitinfy.play', () => {
+            playerService.play();
+        }),
+        vscode.commands.registerCommand('Mitinfy.pause', () => {
+            playerService.pause();
+        }),
+        vscode.commands.registerCommand('Mitinfy.next', () => {
+            playerService.next();
+        }),
+        vscode.commands.registerCommand('Mitinfy.previous', () => {
+            playerService.previous();
+        })
+    ];
+    context.subscriptions.push(...disposables);
 }
-function Login(context) {
-    const disposable = vscode.commands.registerCommand('mitinfy.login', () => {
-        vscode.window.showInformationMessage('Please make the login with Spotify first');
-        (0, login_1.login)();
-    });
-    context.subscriptions.push(disposable);
+function getSavedAccessToken() {
+    const config = vscode.workspace.getConfiguration('mitinfy');
+    return {
+        original_token: config.get('accessToken'),
+        refresh_token: config.get('refreshToken')
+    };
 }
-// This method is called when your extension is deactivated
-function deactivate() { }
-function playMusic() { }
+function deactivate() {
+    // Cleanup if needed
+}
+function playMusic() {
+    // Legacy function - now handled by PlayerService
+}
 //# sourceMappingURL=extension.js.map

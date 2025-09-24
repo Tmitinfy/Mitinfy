@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mitinfy - Search Songs</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+            font-family: var(--vscode-font-family);
+        }
+
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-border);
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--vscode-focusBorder);
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .track-card {
+            background-color: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-widget-border);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            user-select: none; /* Previene selección de texto no deseada */
+        }
+
+        .track-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--vscode-focusBorder);
+        }
+
+        .track-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .track-info {
+            user-select: text; /* Permite seleccionar el texto dentro de la info */
+        }
+
+        .track-info h3 {
+            margin: 0 0 5px 0;
+            color: var(--vscode-editor-foreground);
+            font-size: 1.1em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-info p {
+            margin: 0;
+            color: var(--vscode-descriptionForeground);
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--vscode-descriptionForeground);
+        }
+
+        .error {
+            color: var(--vscode-errorForeground);
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+    <script>
+        const vscode = acquireVsCodeApi();
+        let searchTimeout;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.querySelector('.search-box');
+            const resultsContainer = document.querySelector('.results-container');
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                
+                if (query.length > 2) {
+                    searchTimeout = setTimeout(() => {
+                        vscode.postMessage({ 
+                            type: 'search', 
+                            query 
+                        });
+                        showLoading();
+                    }, 500);
+                }
+                
+            });
+
+            function showLoading() {
+                resultsContainer.innerHTML = '<div class="loading">Searching...</div>';
+            }
+
+            function showError(message) {
+                resultsContainer.innerHTML = `<div class="error">${message}</div>`;
+            }
+
+            function renderResults(tracks) {
+                if (!tracks || tracks.length === 0) {
+                    resultsContainer.innerHTML = '<div class="loading">No results found</div>';
+                    return;
+                }
+
+                resultsContainer.innerHTML = tracks.map(track => `
+                    <div class="track-card" 
+                         data-uri="${track.uri}"
+                         title="Click to play - Right click to copy song info">
+                        <img src="${track.album.images[0]?.url || ''}" 
+                             alt="${track.name} album art">
+                        <div class="track-info">
+                            <h3>${escapeHtml(track.name)}</h3>
+                            <p>${escapeHtml(track.artists.map(a => a.name).join(', '))}</p>
+                            <p>${escapeHtml(track.album.name)}</p>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Agregar manejador de contexto
+                document.querySelectorAll('.track-card').forEach(card => {
+                    card.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        const trackInfo = card.querySelector('.track-info');
+                        const songName = trackInfo.querySelector('h3').textContent;
+                        const artistName = trackInfo.querySelector('p').textContent;
+                        navigator.clipboard.writeText(`${songName} - ${artistName}`);
+                    });
+                });
+
+                // Add click handlers
+                document.querySelectorAll('.track-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        vscode.postMessage({
+                            type: 'play',
+                            uri: card.dataset.uri
+                        });
+                    });
+                });
+            }
+
+            // Función auxiliar para escapar HTML
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // Handle messages from extension
+            window.addEventListener('message', event => {
+                const message = event.data;
+                switch (message.type) {
+                    case 'searchResults':
+                        renderResults(message.tracks);
+
+                        break;
+                    case 'error':
+                        showError(message.message);
+                        break;
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" class="search-box" placeholder="Search for songs, artists, or albums...">
+        <div class="results-container">
+            <div class="loading">Start typing to search...</div>
+        </div>
+    </div>
+</body>
+</html>

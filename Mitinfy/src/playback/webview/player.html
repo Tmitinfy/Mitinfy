@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mitinfy Player - DEBUG</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+            font-family: var(--vscode-font-family);
+        }
+        .debug-info {
+            background: var(--vscode-input-background);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info">
+        <h3>Debug Player</h3>
+        <div id="logs"></div>
+    </div>
+
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script>
+        const logDiv = document.getElementById('logs');
+        
+        function addLog(message) {
+            console.log(message);
+            if (logDiv) {
+                logDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+            }
+        }
+        
+        addLog('🎬 DEBUG HTML loaded');
+        
+        try {
+            const vscode = acquireVsCodeApi();
+            addLog('✅ VSCode API acquired');
+            
+            // Send test message
+            vscode.postMessage({ 
+                type: 'test', 
+                message: 'DEBUG Webview JavaScript is running' 
+            });
+            addLog('✅ Test message sent');
+            
+            // Single message listener
+            window.addEventListener('message', (event) => {
+                addLog('📨 RAW MESSAGE: ' + JSON.stringify(event.data));
+                
+                const message = event.data;
+                if (!message || !message.type) {
+                    addLog('❌ Invalid message format');
+                    return;
+                }
+                
+                addLog('📝 Processing message type: ' + message.type);
+                
+                switch (message.type) {
+                    case 'token':
+                        addLog('🔑 TOKEN RECEIVED! Length: ' + (message.token ? message.token.length : 0));
+                        
+                        if (!message.token) {
+                            addLog('❌ No token in message');
+                            vscode.postMessage({ type: 'error', message: 'No token received' });
+                            return;
+                        }
+                        
+                        // Test token validity
+                        addLog('🧪 Testing token validity...');
+                        fetch('https://api.spotify.com/v1/me', {
+                            headers: { 'Authorization': `Bearer ${message.token}` }
+                        })
+                        .then(response => {
+                            addLog('🌐 Token test response: ' + response.status);
+                            if (!response.ok) {
+                                throw new Error('HTTP ' + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            addLog('👤 User: ' + data.display_name + ' (' + data.product + ')');
+                            
+                            if (data.product === 'premium') {
+                                addLog('✅ Premium confirmed - can initialize player');
+                                vscode.postMessage({ 
+                                    type: 'info', 
+                                    message: `Premium user: ${data.display_name}` 
+                                });
+                                
+                                // Try to initialize Spotify Player
+                                addLog('🎵 Checking Spotify SDK...');
+                                if (typeof Spotify === 'undefined') {
+                                    addLog('❌ Spotify SDK not loaded');
+                                    vscode.postMessage({ type: 'error', message: 'Spotify SDK not available' });
+                                } else {
+                                    addLog('✅ Spotify SDK available');
+                                    initializeSpotifyPlayer(message.token);
+                                }
+                                
+                            } else {
+                                addLog('❌ Premium required, current: ' + data.product);
+                                vscode.postMessage({ 
+                                    type: 'error', 
+                                    message: `Premium required. Current: ${data.product}` 
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            addLog('❌ Token test failed: ' + error.message);
+                            vscode.postMessage({ 
+                                type: 'error', 
+                                message: 'Token validation failed: ' + error.message 
+                            });
+                        });
+                        break;
+                        
+                    case 'play':
+                        addLog('▶️ Play command received');
+                        break;
+                        
+                    default:
+                        addLog('❓ Unknown message type: ' + message.type);
+                }
+            });
+            
+            addLog('✅ Event listener registered');
+            
+        } catch (error) {
+            addLog('💥 CRITICAL ERROR: ' + error.message);
+        }
+        
+        function initializeSpotifyPlayer(token) {
+            addLog('🎵 Initializing Spotify Player...');
+            
+            try {
+                const player = new Spotify.Player({
+                    name: 'Mitinfy Debug Player',
+                    getOAuthToken: cb => { cb(token); },
+                    volume: 0.5
+                });
+                
+                addLog('✅ Player instance created');
+                
+                player.addListener('ready', ({ device_id }) => {
+                    addLog('🎉 PLAYER READY! Device ID: ' + device_id);
+                    vscode.postMessage({ 
+                        type: 'ready', 
+                        deviceId: device_id 
+                    });
+                });
+                
+                player.addListener('initialization_error', ({ message }) => {
+                    addLog('❌ Init error: ' + message);
+                    vscode.postMessage({ type: 'error', message: 'Init error: ' + message });
+                });
+                
+                player.addListener('authentication_error', ({ message }) => {
+                    addLog('❌ Auth error: ' + message);
+                    vscode.postMessage({ type: 'error', message: 'Auth error: ' + message });
+                });
+                
+                player.connect().then(success => {
+                    addLog('🔗 Connect result: ' + success);
+                    if (!success) {
+                        vscode.postMessage({ type: 'error', message: 'Failed to connect to Spotify' });
+                    }
+                });
+                
+            } catch (error) {
+                addLog('💥 Player creation failed: ' + error.message);
+                vscode.postMessage({ type: 'error', message: 'Player creation failed: ' + error.message });
+            }
+        }
+    </script>
+</body>
+</html>

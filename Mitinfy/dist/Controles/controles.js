@@ -3,21 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSavedAccessToken = getSavedAccessToken;
 exports.spotifyRequest = spotifyRequest;
 exports.play = play;
 exports.pause = pause;
 exports.nextTrack = nextTrack;
 exports.previousTrack = previousTrack;
 const vscode_1 = __importDefault(require("vscode"));
-function getSavedAccessToken() {
-    return {
-        refresh_token: vscode_1.default.workspace.getConfiguration().get('mitinfy.refreshToken'),
-        original_token: vscode_1.default.workspace.getConfiguration().get('mitinfy.accessToken')
-    };
-}
+const extension_1 = require("../extension");
 async function spotifyRequest(endpoint, method) {
-    const { original_token } = getSavedAccessToken();
+    const { original_token } = (0, extension_1.getSavedAccessToken)();
     if (!original_token) {
         vscode_1.default.window.showErrorMessage("No se encontró un token de acceso de Spotify.");
         return;

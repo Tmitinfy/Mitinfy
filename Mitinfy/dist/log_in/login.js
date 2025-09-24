@@ -11,8 +11,8 @@ let server = null;
 async function saveTokensToVSCode(accessToken, refreshToken) {
     const config = vscode_1.default.workspace.getConfiguration();
     await Promise.all([
-        config.update('mitinfy.accessToken', accessToken, vscode_1.default.ConfigurationTarget.Global),
-        config.update('mitinfy.refreshToken', refreshToken, vscode_1.default.ConfigurationTarget.Global),
+        config.update('mitinfy.accessToken', accessToken, true),
+        config.update('mitinfy.refreshToken', refreshToken, true),
     ]);
 }
 ;
@@ -22,11 +22,18 @@ async function login() {
             console.log('🚀 Servidor corriendo en puerto 8080');
         });
     }
+    const scopes = [
+        'streaming', // CRÍTICO - Web Playback SDK
+        'user-read-email', // CRÍTICO - Web Playback SDK  
+        'user-read-private', // CRÍTICO - Web Playback SDK
+        'user-read-playback-state', // Para leer estado actual
+        'user-modify-playback-state' // Para controlar reproducción
+    ].join('%20');
     const auth_url = 'https://accounts.spotify.com/authorize?'
         + `client_id=${extension_1.CLIENT_ID}`
         + '&response_type=code'
         + `&redirect_uri=${encodeURIComponent(extension_1.REDIRECT_URL)}`
-        + '&scope=user-read-playback-state user-modify-playback-state streaming';
+        + `&scope=${scopes}`;
     await vscode_1.default.env.openExternal(vscode_1.default.Uri.parse(auth_url));
     extension_1.app.get('/callback', async (req, res) => {
         try {

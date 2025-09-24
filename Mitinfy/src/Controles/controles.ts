@@ -1,11 +1,6 @@
 import vscode from 'vscode';
+import { getSavedAccessToken } from '../extension';
 
-export function getSavedAccessToken() {
-    return {
-        refresh_token: vscode.workspace.getConfiguration().get('mitinfy.refreshToken'),
-        original_token: vscode.workspace.getConfiguration().get('mitinfy.accessToken')
-    };
-}
 
 export async function spotifyRequest(endpoint: string, method: string) {
     const { original_token } = getSavedAccessToken();

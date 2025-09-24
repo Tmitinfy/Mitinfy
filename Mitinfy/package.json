@@ -21,27 +21,32 @@
       },
       {
         "command": "Mitinfy.login",
-        "title": "login into mitinfy"
+        "title": "Login into Mitinfy"
       },
-
+      {
+        "command": "Mitinfy.showPlayer",
+        "title": "Show Mitinfy Player"
+      },
+      {
+        "command": "Mitinfy.search",
+        "title": "Search Songs"
+      },
       {
         "command": "Mitinfy.play",
-        "title": "play cancion"
+        "title": "Play"
       },
       {
-        "command": "Mitinfy.pausa",
-        "title": "pausar cancion"
+        "command": "Mitinfy.pause",
+        "title": "Pause"
       },
       {
-        "command": "Mitinfy.siguienteCancion",
-        "title": "pasar cancion"
+        "command": "Mitinfy.next",
+        "title": "Next Track"
       },
       {
-        "command": "Mitinfy.cancionAnterior",
-        "title": "volver cancion"
+        "command": "Mitinfy.previous",
+        "title": "Previous Track"
       }
-
-
     ],
     "configuration": {
       "title": "Mitinfy",
