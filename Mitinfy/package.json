@@ -1,5 +1,5 @@
 {
-  "name": "Mitinfy",
+  "name": "mitinfy",
   "displayName": "mitinfy",
   "description": "music player integrated into vscode with low resource consumption",
   "version": "0.0.1",
@@ -10,7 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:mi-extension.abrirPanel"
+    "onCommand:mitinfy.init"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -18,34 +18,75 @@
       {
         "command": "Mitinfy.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "Mitinfy.login",
+        "title": "login into mitinfy"
+      },
+
+      {
+        "command": "Mitinfy.play",
+        "title": "play cancion"
+      },
+      {
+        "command": "Mitinfy.pausa",
+        "title": "pausar cancion"
+      },
+      {
+        "command": "Mitinfy.siguienteCancion",
+        "title": "pasar cancion"
+      },
+      {
+        "command": "Mitinfy.cancionAnterior",
+        "title": "volver cancion"
       }
-    ]
+
+
+    ],
+    "configuration": {
+      "title": "Mitinfy",
+      "properties": {
+        "mitinfy.accessToken": {
+          "type": "string",
+          "default": "",
+          "description": "Spotify access token",
+          "scope": "machine"
+        },
+        "mitinfy.refreshToken": {
+          "type": "string",
+          "default": "",
+          "description": "Spotify refresh token",
+          "scope": "machine"
+        }
+      }
+    }
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "npm run check-types && npm run lint && node esbuild.js",
-    "watch": "npm-run-all -p watch:*",
-    "watch:esbuild": "node esbuild.js --watch",
-    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "npm run check-types && npm run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
-    "check-types": "tsc --noEmit",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.103.0",
+    "@types/express": "^5.0.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
+    "@types/spotify-web-api-node": "^5.0.11",
+    "@types/vscode": "^1.103.0",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
     "@typescript-eslint/parser": "^8.39.0",
-    "eslint": "^9.32.0",
-    "esbuild": "^0.25.8",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.9.2",
     "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2"
-  }
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.32.0",
+    "express": "^5.1.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "spotify-web-api-node": "^5.0.2",
+    "Typescript": "npm:typescript@^5.9.2"
+  },
+  "author": "",
+  "license": "ISC"
 }
