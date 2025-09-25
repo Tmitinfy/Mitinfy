@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>interfaz</title>
+  <link rel="stylesheet" href="style.css"> <!-- si querés agregar CSS aparte -->
+</head>
+<body>
+  <div class="player">
+
+    <div class="current-song">
+      <div class="song-info">
+        <h3 id="title">Título de la canción</h3>
+        <p id="artist">Artista</p>
+      </div>
+    </div>
+
+    <audio id="audio" src="cancion1.mp3"></audio>
+
+    <div class="progress-container">
+      <span id="current-time">0:00</span>
+      <input type="range" id="progress" value="0" min="0" max="100">
+      <span id="duration">0:00</span>
+    </div>
+
+    <div class="controls">
+      <button id="prev">⏮︎</button>
+      <button id="play">▶</button>
+      <button id="pause">⏸</button>
+      <button id="next">⏭</button>
+    </div>
+
+    <div class="volume-container">
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+    </div>
+
+  </div>
+</body>
+</html>

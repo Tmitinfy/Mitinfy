@@ -7,6 +7,10 @@
 			"ES2022"
 		],
 		"sourceMap": true,
+		"rootDir": "./",
+		"strict": true,
+    	"outDir": "dist",
+	    "types": [""]
 		"strict": true,   /* enable all strict type-checking options */
 		"outDir": "./dist",
     	"rootDir": "./src"
